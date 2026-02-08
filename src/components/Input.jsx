@@ -1,11 +1,11 @@
 const Input = ({ name, label, type, handleInput, value }) => {
   return (
-    <div className="mb-3 p-2">
-      <label className="block p-1">
-        {label}
+    <div className="form-control w-full">
+      <label className="label">
+        <span className="label-text font-semibold">{label}</span>
       </label>
       <input
-        className="input w-full"
+        className="input input-bordered input-primary w-full"
         type={type}
         name={name}
         onChange={handleInput}

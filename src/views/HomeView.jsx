@@ -16,6 +16,23 @@ const HomeView = ({ userAuth }) => {
         { name: "synopsis", label: "Synopsis de la pelicula" },
         { name: "anioEstreno", label: "Año de estreno" },
         { name: "categorias", label: "Categoria" },
+        {
+            name: "imagenUrl",
+            label: "Imagen",
+            render: (item) => (
+                item.imagenUrl ? (
+                    <img
+                        src={item.imagenUrl}
+                        alt={item.nombre}
+                        className="w-16 h-24 object-cover rounded-md shadow-sm hover:scale-150 transition-transform duration-200"
+                    />
+                ) : (
+                    <div className="w-16 h-24 bg-gray-200 rounded-md flex items-center justify-center text-gray-400 text-xs text-center p-1">
+                        Sin imagen
+                    </div>
+                )
+            )
+        },
         { name: "createAt", label: "Fecha de Registrio" },
         { name: "usuarioPelicula", label: "Usuario" },
     ]
@@ -34,7 +51,9 @@ const HomeView = ({ userAuth }) => {
 
         if (confirm.isConfirmed) {
             try {
-                await deletePelicula(info.nombre);
+                // Usamos el ID de la película si existe, de lo contrario usamos el nombre (por compatibilidad hacia atrás si es necesario)
+                const idToDelete = info.id || info.nombre;
+                await deletePelicula(idToDelete);
 
                 await Swal.fire({
                     title: '¡Eliminada!',
@@ -87,7 +106,10 @@ const HomeView = ({ userAuth }) => {
             try {
                 const data = await readPelicula();
 
-                const dataFormateada = data.map(p => ({
+                // Manejar respuesta paginada (Spring Boot Page) o lista directa
+                const peliculasList = data.content || data;
+
+                const dataFormateada = peliculasList.map(p => ({
                     ...p,
                     categorias: Array.isArray(p.categorias)
                         ? p.categorias.join(", ")
@@ -106,8 +128,8 @@ const HomeView = ({ userAuth }) => {
     return (
 
         <div className="min-h-screen bg-gray-50">
-            <div className="max-w-7xl mx-auto p-6">
-                <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div className="w-full mx-auto p-4">
+                <div className="bg-white rounded-lg shadow-md p-4 mb-6">
                     <h1 className="text-3xl font-bold text-gray-800 mb-2">
                         🎬 Lista de Películas
                     </h1>

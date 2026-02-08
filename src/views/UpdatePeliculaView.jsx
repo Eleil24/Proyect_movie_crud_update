@@ -48,8 +48,10 @@ const UpdatePeliculaView = () => {
 
       console.log("Enviando actualización:", peliculaToSend);
 
-      // Enviar el nombre original de la URL y los datos nuevos
-      const result = await updatePelicula(nombre, peliculaToSend);
+      // Enviar el ID de la película y los datos nuevos
+      // Asumimos que el ID viene en el objeto 'pelicula' cargado desde la API
+      const idToUpdate = pelicula.id || pelicula.idPelicula || nombre;
+      const result = await updatePelicula(idToUpdate, peliculaToSend);
       console.log("Resultado:", result);
 
       await Swal.fire({
