@@ -2,9 +2,17 @@ import axios from "./axiosConfig";
 
 const BASE_URL = import.meta.env.VITE_API_URI;
 
-const readPelicula = async () => {
-  // Se agregan los parametros requeridos por el backend: page, size, direccion
-  const response = await axios.get(`${BASE_URL}/find?page=1&size=100&direccion=ASC`);
+const readPelicula = async ({ page = 1, size = 10, nombre = "", anioEstreno = "", categoria = "" } = {}) => {
+  const params = new URLSearchParams();
+  params.append('page', page);
+  params.append('size', size);
+  params.append('direccion', 'ASC');
+
+  if (nombre) params.append('nombre', nombre);
+  if (anioEstreno) params.append('anioEstreno', anioEstreno);
+  if (categoria) params.append('categoria', categoria);
+
+  const response = await axios.get(`${BASE_URL}/find?${params.toString()}`);
   if (response.status !== 200) {
     throw new Error("Error al obtener las peliculas");
   }

@@ -1,7 +1,7 @@
 function TableData(props) {
     const { data, headers, actions } = props;
     return (
-        <div className="overflow-x-auto bg-white rounded-lg shadow-lg border border-gray-100">
+        <div className="overflow-x-auto bg-white rounded-lg shadow-lg border border-gray-100 pb-5">
             <table className="table w-full">
                 <thead className="bg-gray-200 border-b-2 border-gray-300">
                     <tr>
