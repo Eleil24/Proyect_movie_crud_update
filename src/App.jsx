@@ -20,18 +20,18 @@ function App() {
   }, []);
 
   if (!userAuth) {
-    <Toaster position="top-right" /> 
+    <Toaster position="top-right" />
     return <LoginView onLoginSuccess={setUserAuth} />;
   }
 
   return (
     <BrowserRouter>
-      <Toaster position="top-right" /> 
+      <Toaster position="top-right" />
       <Navbar />
       <Routes>
         <Route path="/" element={<HomeView userAuth={userAuth} />} />
         <Route path="/crearPelicula" element={<CreatePeliculaView />} />
-        <Route path="/updatePelicula/:nombre" element={<UpdatePeliculaView />} />
+        <Route path="/updatePelicula/:id" element={<UpdatePeliculaView />} />
       </Routes>
     </BrowserRouter>
   );

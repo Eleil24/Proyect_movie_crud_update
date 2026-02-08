@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "./axiosConfig";
 
 const BASE_URL = import.meta.env.VITE_API_URI;
 
@@ -16,8 +16,15 @@ const readPeliculaByName = async (name) => {
   if (response.status !== 200) {
     throw new Error("Error al obtener los datos")
   }
-  // Asumiendo que devuelve una lista y tomamos el primero
   return Array.isArray(response.data) && response.data.length > 0 ? response.data[0] : null;
+}
+
+const readPeliculaById = async (id) => {
+  const response = await axios.get(`${BASE_URL}/detail/${id}`);
+  if (response.status !== 200) {
+    throw new Error("Error al obtener los datos de la película");
+  }
+  return response.data;
 }
 
 const updatePelicula = async (id, peliculaEditada) => {
@@ -47,4 +54,4 @@ const deletePelicula = async (id) => {
   return response.data;
 }
 
-export { readPelicula, createPelicula, readPeliculaByName, updatePelicula, deletePelicula };
+export { readPelicula, createPelicula, readPeliculaByName, readPeliculaById, updatePelicula, deletePelicula };

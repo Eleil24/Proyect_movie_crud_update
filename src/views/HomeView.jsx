@@ -83,7 +83,7 @@ const HomeView = ({ userAuth }) => {
             content: (info) => (
                 <button
                     className="btn btn-sm bg-yellow-500 text-white"
-                    onClick={() => { navigate(`/updatepelicula/${encodeURIComponent(info.nombre)}`) }}
+                    onClick={() => { navigate(`/updatePelicula/${info.id || info.idPelicula}`) }}
                 >
                     <Pencil />
                 </button>
