@@ -5,6 +5,7 @@ import HomeView from "./views/HomeView";
 import CreatePeliculaView from "./views/CreatePeliculaView";
 import Navbar from "./components/Navbar";
 import UpdatePeliculaView from "./views/UpdatePeliculaView";
+import UsersListView from "./views/UsersListView";
 import './services/axiosConfig';
 
 import { Toaster } from "react-hot-toast";
@@ -32,6 +33,7 @@ function App() {
         <Route path="/" element={<HomeView userAuth={userAuth} />} />
         <Route path="/crearPelicula" element={<CreatePeliculaView />} />
         <Route path="/updatePelicula/:id" element={<UpdatePeliculaView />} />
+        <Route path="/usuarios" element={<UsersListView />} />
       </Routes>
     </BrowserRouter>
   );

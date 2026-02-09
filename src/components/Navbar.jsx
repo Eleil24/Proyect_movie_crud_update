@@ -50,6 +50,14 @@ const Navbar = () => {
             </Link>
           </li>
           <li>
+            <Link
+              to="/usuarios"
+              className="btn btn-ghost hover:bg-purple-800 font-medium"
+            >
+              Usuarios
+            </Link>
+          </li>
+          <li>
             <button
               onClick={handleLogout}
               className="btn btn-ghost hover:bg-purple-800 font-medium"
