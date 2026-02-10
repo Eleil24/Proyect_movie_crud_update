@@ -8,7 +8,15 @@ axios.interceptors.request.use(
             const userAuth = JSON.parse(userAuthStr);
 
             if (userAuth.token) {
-                config.headers.Authorization = `Bearer ${userAuth.token}`;
+                const token = userAuth.token;
+
+                const tokenString = typeof token === 'object' ? (token.accessToken || token.token) : token;
+
+                if (typeof tokenString === 'string') {
+                    config.headers.Authorization = `Bearer ${tokenString}`;
+                } else {
+                    console.warn("Axios Interceptor - Token is not a string:", token);
+                }
             }
         }
 

@@ -62,4 +62,12 @@ const deletePelicula = async (id) => {
   return response.data;
 }
 
-export { readPelicula, createPelicula, readPeliculaByName, readPeliculaById, updatePelicula, deletePelicula };
+const findAllRate = async () => {
+  const response = await axios.get(`${BASE_URL}/findAllRate`);
+  if (response.status !== 200) {
+    throw new Error("Error al obtener las peliculas mejor calificadas");
+  }
+  return response.data;
+}
+
+export { readPelicula, createPelicula, readPeliculaByName, readPeliculaById, updatePelicula, deletePelicula, findAllRate };
