@@ -2,10 +2,14 @@ import { useState, useEffect } from "react";
 import { findAllRate } from "../services/peliculaService";
 
 
+import MovieDetailModal from "../components/MovieDetailModal";
+
 const UserHomeView = () => {
 
     const [peliculas, setPelicula] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedMovie, setSelectedMovie] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         const getPeliculas = async () => {
@@ -25,7 +29,8 @@ const UserHomeView = () => {
                     ...p,
                     categorias: Array.isArray(p.categorias)
                         ? p.categorias.join(", ")
-                        : p.categorias || ""
+                        : p.categorias || "",
+                    calificacionUsuario: p.miRating || 0
                 }));
 
                 setPelicula(dataFormateada);
@@ -38,6 +43,24 @@ const UserHomeView = () => {
 
         getPeliculas();
     }, []);
+
+    const handleOpenModal = (movie) => {
+        setSelectedMovie(movie);
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedMovie(null);
+    };
+
+    const handleUpdateSuccess = (movieId, newRating) => {
+        setPelicula(currentPeliculas =>
+            currentPeliculas.map(p =>
+                p.id == movieId ? { ...p, calificacionUsuario: newRating } : p
+            )
+        );
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 py-6 px-2 sm:px-4 lg:px-5">
@@ -56,7 +79,11 @@ const UserHomeView = () => {
                 ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                         {peliculas.map((item) => (
-                            <div key={item.id || item.nombre} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full">
+                            <div
+                                key={item.id || item.nombre}
+                                onClick={() => handleOpenModal(item)}
+                                className="cursor-pointer bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full ring-2 ring-transparent hover:ring-indigo-500"
+                            >
                                 <div className="relative pt-[140%] bg-gray-200">
                                     {item.imagenUrl ? (
                                         <img
@@ -76,6 +103,12 @@ const UserHomeView = () => {
                                     <div className="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs font-bold px-2 py-1 rounded-full">
                                         {item.anioEstreno}
                                     </div>
+                                    {/* Optional: Show user rating on card if available */}
+                                    {item.calificacionUsuario > 0 && (
+                                        <div className="absolute bottom-2 left-2 bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                                            <span>★</span> {item.calificacionUsuario}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="p-5 flex flex-col flex-grow">
                                     <div className="mb-2">
@@ -95,6 +128,15 @@ const UserHomeView = () => {
                     </div>
                 )}
             </div>
+
+            {isModalOpen && selectedMovie && (
+                <MovieDetailModal
+                    isOpen={isModalOpen}
+                    onClose={handleCloseModal}
+                    movie={selectedMovie}
+                    onUpdateSuccess={handleUpdateSuccess}
+                />
+            )}
         </div>
     )
 }
