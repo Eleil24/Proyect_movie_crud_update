@@ -59,6 +59,14 @@ const Navbar = () => {
             <>
               <li>
                 <Link
+                  to="/calificaciones"
+                  className="btn btn-ghost hover:bg-purple-800 font-medium"
+                >
+                  Lista de Calificaciones
+                </Link>
+              </li>
+              <li>
+                <Link
                   to="/"
                   className="btn btn-ghost hover:bg-purple-800 font-medium"
                 >

@@ -73,7 +73,8 @@ function App() {
       <Toaster position="top-right" />
       <Navbar />
       <Routes>
-        <Route path="/" element={isAdmin ? <HomeView userAuth={userAuth} /> : <UserHomeView />} />
+        <Route path="/" element={isAdmin ? <HomeView userAuth={userAuth} initialViewMode="movies" /> : <UserHomeView />} />
+        <Route path="/calificaciones" element={isAdmin ? <HomeView userAuth={userAuth} initialViewMode="ratings" /> : <Navigate to="/" replace />} />
 
         {isAdmin && (
           <>

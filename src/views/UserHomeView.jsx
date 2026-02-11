@@ -11,6 +11,7 @@ const UserHomeView = () => {
     const [selectedMovie, setSelectedMovie] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+
     useEffect(() => {
         const getPeliculas = async () => {
             try {
@@ -61,6 +62,8 @@ const UserHomeView = () => {
             )
         );
     };
+
+
 
     return (
         <div className="min-h-screen bg-gray-50 py-6 px-2 sm:px-4 lg:px-5">

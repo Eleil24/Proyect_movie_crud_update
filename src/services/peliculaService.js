@@ -88,4 +88,23 @@ const deleteRate = async (idPelicula) => {
   return response.data;
 }
 
-export { readPelicula, createPelicula, readPeliculaByName, readPeliculaById, updatePelicula, deletePelicula, findAllRate, saveRate, deleteRate };
+const getAllRatings = async () => {
+  const response = await axios.get(`${RATE_URL}/findAll`);
+  if (response.status !== 200) {
+    throw new Error("Error al obtener las calificaciones");
+  }
+  return response.data;
+}
+
+const deleteRatingAdmin = async (idPelicula, correo) => {
+  // console.log(`Attempting to delete rating for movie ${idPelicula} and user ${correo}`);
+  const response = await axios.delete(`${RATE_URL}/deleteAdmin`, {
+    params: { idPelicula, correo }
+  });
+  if (response.status !== 200) {
+    throw new Error("Error al eliminar la calificación");
+  }
+  return response.data;
+}
+
+export { readPelicula, createPelicula, readPeliculaByName, readPeliculaById, updatePelicula, deletePelicula, findAllRate, saveRate, deleteRate, getAllRatings, deleteRatingAdmin };
