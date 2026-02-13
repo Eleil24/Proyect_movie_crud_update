@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { readPelicula, deletePelicula, getAllRatings, deleteRatingAdmin } from "../services/peliculaService";
 import { getAllCategorias } from "../services/categoriaService";
+import { useReactTable, getCoreRowModel, getPaginationRowModel, getFilteredRowModel, flexRender } from "@tanstack/react-table";
 import TableData from "../components/TableData";
 import { Pencil, Trash } from "lucide-react";
 import Swal from "sweetalert2";
@@ -26,7 +27,7 @@ const HomeView = ({ userAuth, initialViewMode = 'movies' }) => {
         totalElements: 0
     });
 
-    const [viewMode, setViewMode] = useState(initialViewMode); // 'movies' or 'ratings'
+    const [viewMode, setViewMode] = useState(initialViewMode);
     const [ratings, setRatings] = useState([]);
     const [loadingRatings, setLoadingRatings] = useState(false);
 
@@ -142,7 +143,6 @@ const HomeView = ({ userAuth, initialViewMode = 'movies' }) => {
                 };
 
                 const data = await readPelicula(params);
-                // console.log("Full API Response:", data);
 
                 let peliculasList = [];
                 let totalPages = 1;
@@ -224,7 +224,6 @@ const HomeView = ({ userAuth, initialViewMode = 'movies' }) => {
             try {
                 setLoadingRatings(true);
                 const data = await getAllRatings();
-                // console.log("Ratings Data Fetched:", data);
                 setRatings(data);
             } catch (error) {
                 console.error("Error fetching ratings:", error);
@@ -234,7 +233,7 @@ const HomeView = ({ userAuth, initialViewMode = 'movies' }) => {
         }
     };
 
-    const handleDeleteRating = async (rating) => {
+    const handleDeleteRating = useCallback(async (rating) => {
         const confirm = await Swal.fire({
             title: '¿Estás seguro?',
             text: `¿Eliminar calificación de "${rating.nombrePelicula}"?`,
@@ -252,9 +251,9 @@ const HomeView = ({ userAuth, initialViewMode = 'movies' }) => {
                 const correo = rating.correoUsuario;
 
                 const responseData = await deleteRatingAdmin(idPelicula, correo);
-                // console.log("Delete Response Data:", responseData);
 
                 setRatings(prevRatings => prevRatings.filter(r => r.idCalificacion !== rating.idCalificacion));
+
                 await Swal.fire(
                     '¡Eliminado!',
                     'La calificación ha sido eliminada.',
@@ -269,7 +268,7 @@ const HomeView = ({ userAuth, initialViewMode = 'movies' }) => {
                 );
             }
         }
-    };
+    }, []);
 
     const [ratingFilters, setRatingFilters] = useState({
         usuario: "",
@@ -277,16 +276,82 @@ const HomeView = ({ userAuth, initialViewMode = 'movies' }) => {
         rating: ""
     });
 
+    const [columnFilters, setColumnFilters] = useState([]);
+
     const handleRatingFilterChange = (e) => {
         const { name, value } = e.target;
+
+        const columnMap = {
+            'pelicula': 'nombrePelicula',
+            'usuario': 'correoUsuario',
+            'rating': 'rating'
+        };
+        const columnId = columnMap[name];
+
+        setColumnFilters(prev => {
+            const newFilters = prev.filter(f => f.id !== columnId);
+            if (value) {
+                newFilters.push({ id: columnId, value });
+            }
+            return newFilters;
+        });
+
         setRatingFilters(prev => ({ ...prev, [name]: value }));
     };
 
-    const filteredRatings = ratings.filter(rating => {
-        const matchUser = rating.correoUsuario.toLowerCase().includes(ratingFilters.usuario.toLowerCase());
-        const matchMovie = rating.nombrePelicula.toLowerCase().includes(ratingFilters.pelicula.toLowerCase());
-        const matchRating = ratingFilters.rating === "" || rating.rating.toString() === ratingFilters.rating;
-        return matchUser && matchMovie && matchRating;
+
+    const columns = useMemo(() => [
+        {
+            header: "ID",
+            accessorKey: "idCalificacion",
+            cell: info => `#${info.getValue()}`
+        },
+        {
+            header: "Pelicula",
+            accessorKey: "nombrePelicula",
+        },
+        {
+            header: "Usuario",
+            accessorKey: "correoUsuario",
+        },
+        {
+            header: "Calificación",
+            accessorKey: "rating",
+            cell: info => (
+                <div className="flex items-center">
+                    <span className="text-yellow-400 mr-1 text-lg">★</span>
+                    <span className="font-bold">{info.getValue()}</span>
+                </div>
+            )
+        },
+        {
+            header: "Gestión",
+            id: "actions",
+            cell: ({ row }) => (
+                <div className="text-center">
+                    <button
+                        onClick={() => handleDeleteRating(row.original)}
+                        className="btn btn-sm btn-ghost text-red-600 hover:bg-red-50"
+                        title="Eliminar calificación"
+                    >
+                        <Trash size={18} />
+                    </button>
+                </div>
+            )
+        }
+
+    ], [handleDeleteRating]);
+
+    const table = useReactTable({
+        data: ratings,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        state: {
+            columnFilters
+        },
+        onColumnFiltersChange: setColumnFilters
     });
 
     return (
@@ -300,7 +365,6 @@ const HomeView = ({ userAuth, initialViewMode = 'movies' }) => {
 
                     {viewMode === 'movies' ? (
                         <>
-                            {/* Filtros Películas */}
                             <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end mb-4">
                                 <div className="form-control">
                                     <label className="label">
@@ -363,7 +427,6 @@ const HomeView = ({ userAuth, initialViewMode = 'movies' }) => {
                         </>
                     ) : (
                         <>
-                            {/* Filtros Calificaciones */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end mb-4">
                                 <div className="form-control">
                                     <label className="label">
@@ -423,7 +486,6 @@ const HomeView = ({ userAuth, initialViewMode = 'movies' }) => {
                                 actions={actions}
                             />
 
-                            {/* Paginación */}
                             <div className="flex justify-center items-center p-4 bg-gray-50 border-t border-gray-100">
                                 <div className="join">
                                     <button
@@ -451,43 +513,64 @@ const HomeView = ({ userAuth, initialViewMode = 'movies' }) => {
                             <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
-                                        <tr>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider w-16">ID</th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Pelicula</th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Usuario</th>
-                                            <th scope="col" className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Calificación</th>
-                                            <th scope="col" className="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider w-24">Gestión</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {filteredRatings.map((rating) => (
-                                            <tr key={rating.idCalificacion} className="hover:bg-gray-50 transition-colors duration-150">
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">#{rating.idCalificacion}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{rating.nombrePelicula}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{rating.correoUsuario}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    <div className="flex items-center">
-                                                        <span className="text-yellow-400 mr-1 text-lg">★</span>
-                                                        <span className="font-bold">{rating.rating}</span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                                                    <button
-                                                        onClick={() => handleDeleteRating(rating)}
-                                                        className="btn btn-sm btn-ghost text-red-600 hover:bg-red-50"
-                                                        title="Eliminar calificación"
-                                                    >
-                                                        <Trash size={18} />
-                                                    </button>
-                                                </td>
+                                        {table.getHeaderGroups().map(headerGroup => (
+                                            <tr key={headerGroup.id}>
+                                                {headerGroup.headers.map(header => (
+                                                    <th key={header.id} className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                                        {header.isPlaceholder
+                                                            ? null
+                                                            : flexRender(
+                                                                header.column.columnDef.header,
+                                                                header.getContext()
+                                                            )}
+                                                    </th>
+                                                ))}
                                             </tr>
                                         ))}
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {table.getRowModel().rows.length > 0 ? (
+                                            table.getRowModel().rows.map(row => (
+                                                <tr key={row.id} className="hover:bg-gray-50 transition-colors duration-150">
+                                                    {row.getVisibleCells().map(cell => (
+                                                        <td key={cell.id} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                        </td>
+                                                    ))}
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan={columns.length} className="text-center py-10 text-gray-500">
+                                                    No se encontraron calificaciones con estos filtros
+                                                </td>
+                                            </tr>
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
-                            {filteredRatings.length === 0 && (
-                                <div className="text-center py-10 text-gray-500">No se encontraron calificaciones con estos filtros</div>
-                            )}
+
+                            <div className="flex items-center justify-between mt-4 px-2">
+                                <span className="text-sm text-gray-700">
+                                    Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
+                                </span>
+                                <div className="join">
+                                    <button
+                                        className="join-item btn btn-sm"
+                                        onClick={() => table.previousPage()}
+                                        disabled={!table.getCanPreviousPage()}
+                                    >
+                                        « Anterior
+                                    </button>
+                                    <button
+                                        className="join-item btn btn-sm"
+                                        onClick={() => table.nextPage()}
+                                        disabled={!table.getCanNextPage()}
+                                    >
+                                        Siguiente »
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
