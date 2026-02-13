@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { loginUser } from "../services/authService";
-import { Mail, Lock, Clapperboard} from "lucide-react";
+import { Mail, Lock, Clapperboard, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 
 
 export default function LoginView({ onLoginSuccess }) {
 
-  const [correo, setCorreo] = useState("");
-  const [password, setPassword] = useState("");
+  const [correo, setCorreo] = useState("eleil@gmail.com");
+  const [password, setPassword] = useState("12345");
+  const [showPassword, setShowPassword] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -72,13 +73,20 @@ export default function LoginView({ onLoginSuccess }) {
                 <Lock size={20} className="text-gray-400" />
               </div>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Contraseña"
-                className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+                className="w-full pl-12 pr-12 py-3 bg-gray-800/50 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-white transition-colors cursor-pointer"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
 
             <button
